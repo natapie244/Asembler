@@ -10,10 +10,18 @@
 #include <vector>
 #include <iostream>
 
-void multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB) {
+int multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB) {
+
+
+
 	int n = matrixA.size();
 	int m = matrixA[0].size();
 	int p = matrixB[0].size();
+
+	int ** tablica = new int *[n];
+
+	for (int i = 0; i < p; i++)
+		tablica[i] = new int[p];
 
 	std::vector<std::vector<int>> c(n, std::vector<int>(p, 0));
 
@@ -24,6 +32,8 @@ void multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vect
 			}
 		}
 	}
+
+	return 5;
 }
 
 void multiply() {

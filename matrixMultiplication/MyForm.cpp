@@ -18,7 +18,8 @@
 
 using namespace System;
 using namespace System::Windows::Forms;
-typedef void(*procCpp)(std::vector<std::vector<int>>, std::vector<std::vector<int>>);
+typedef int(*procCpp)(std::vector<std::vector<int>>, std::vector<std::vector<int>>);
+typedef int(*procMASM)(double*, double*, double*, int, int, int);
 //typedef void(*procCpp)();
 
 
@@ -104,30 +105,65 @@ matrixInfo getMatrixInfo(std::vector<std::vector<int>> matrix) {
 	return info;
 }
 
-//void multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB) {
-//	int n = matrixA.size();
-//	int m = matrixA[0].size();
-//	int p = matrixB[0].size();
-//
-//	std::vector<std::vector<int>> c(n, std::vector<int>(p,0));
-//
-//	for (int j = 0; j < p; j++) {
-//		for (int k = 0; k < m; k++) {
-//			for (int i = 0; i < n; i++) {
-//				c[i][j] += matrixA[i][k] * matrixB[k][j];
-//			}
-//		}
-//	}
-//}
+void multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB) {
+	int n = matrixA.size();
+	int m = matrixA[0].size();
+	int p = matrixB[0].size();
+
+	int ** tablica = new int *[n];
+
+	for (int i = 0; i < p; i++)
+		tablica[i] = new int[p];
+
+	std::vector<std::vector<int>> c(n, std::vector<int>(p, 0));
+
+	for (int j = 0; j < p; j++) {
+		for (int k = 0; k < m; k++) {
+			for (int i = 0; i < n; i++) {
+				tablica[i][j] = 0;
+			}
+		}
+	}
+
+	for (int j = 0; j < p; j++) {
+		for (int k = 0; k < m; k++) {
+			for (int i = 0; i < n; i++) {
+				tablica[i][j] += matrixA[i][k] * matrixB[k][j];
+			}
+		}
+	}
+}
 
 void test(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB) {
 	HINSTANCE cppDll = LoadLibraryA("DllCpp");
+
 	procCpp multiplyCpp = (procCpp)GetProcAddress(cppDll, "multiplyMatrix");
-
+	
 	if (cppDll != NULL) {
-		multiplyCpp(matrixA, matrixB);
+		//multiplyCpp();
+		int num = multiplyCpp(matrixA, matrixB);
 
+		std::cout << num;
 	}
 
+
+}
+
+void test_2() {
+	HINSTANCE asmDll = LoadLibraryA("AsmDll");
+	procMASM multiplyMASM = (procMASM)GetProcAddress(asmDll, "Multiply");
+
+	double matrix_1[9] = { 2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0 };
+	double matrix_2[9] = { 3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0 };
+	double matrix_3[9] = { 0.0 };
+	double* mat_1 = matrix_1;
+	double* mat_2 = matrix_2;
+	double* mat_3 = matrix_3;
+
+	if (asmDll != NULL) {
+		//multiplyCpp();
+		multiplyMASM(mat_1, mat_2, mat_3,3,3,3);
+		matrix_3[3] = 0;
+	}
 
 }

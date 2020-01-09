@@ -17,6 +17,7 @@ std::vector<std::vector<int>> loadFile(std::string filename);
 matrixInfo getMatrixInfo(std::vector<std::vector<int>>);
 void multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB);
 void test(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB);
+void test_2();
 matrixInfo matrixAInfo = { false, 0, 0 };
 matrixInfo matrixBInfo = { false, 0, 0 };
 
@@ -354,7 +355,8 @@ namespace matrixMultiplication {
 		}
 	private: System::Void confirmButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		//multiplyMatrix(matrixA, matrixB);
-		test(matrixA, matrixB);
+		//test(matrixA, matrixB);
+		test_2();
 	}
 };
 }

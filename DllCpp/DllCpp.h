@@ -9,7 +9,7 @@
 #endif
 
 
-extern "C" DLLCPP void multiplyMatrix(
+extern "C" DLLCPP int multiplyMatrix(
 	std::vector<std::vector<int>>, std::vector<std::vector<int>>);
 
 extern "C" DLLCPP void multiply();
