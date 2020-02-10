@@ -13,17 +13,18 @@ struct matrixInfo
 	int colums;
 };
 
-std::vector<std::vector<int>> loadFile(std::string filename);
-matrixInfo getMatrixInfo(std::vector<std::vector<int>>);
+double * vectorToArray(std::vector<std::vector<double>> matrixA);
+std::vector<std::vector<double>> loadFile(std::string filename);
+matrixInfo getMatrixInfo(std::vector<std::vector<double>>);
 void multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB);
-void test(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB);
-void test_2();
+void cppMatrixMultiplication(std::vector<std::vector<double>> matrixA, std::vector<std::vector<double>> matrixB);
+void asmMatrixMultiplication(std::vector<std::vector<double>> matrixA, std::vector<std::vector<double>> matrixB);
 matrixInfo matrixAInfo = { false, 0, 0 };
 matrixInfo matrixBInfo = { false, 0, 0 };
 
 
-std::vector<std::vector<int>> matrixA;
-std::vector<std::vector<int>> matrixB;
+std::vector<std::vector<double>> matrixA;
+std::vector<std::vector<double>> matrixB;
 
 
 namespace matrixMultiplication {
@@ -355,8 +356,13 @@ namespace matrixMultiplication {
 		}
 	private: System::Void confirmButton_Click(System::Object^  sender, System::EventArgs^  e) {
 		//multiplyMatrix(matrixA, matrixB);
-		//test(matrixA, matrixB);
-		test_2();
+
+		//cppMatrixMultiplication(matrixA, matrixB); 
+			///to ju¿ dzia³a na intach, do przerobienia na double
+		asmMatrixMultiplication(matrixA, matrixB);
+
+
+		//vectorToArray(matrixA);
 	}
 };
 }

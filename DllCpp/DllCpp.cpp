@@ -10,30 +10,23 @@
 #include <vector>
 #include <iostream>
 
-int multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB) {
+void multiplyMatrix(std::vector<std::vector<double>> * matrixA, std::vector<std::vector<double>> * matrixB, std::vector<std::vector<double>> * matrixC) {
 
 
+	int n = (*matrixA).size();
+	int m = (*matrixA)[0].size();
+	int p = (*matrixB)[0].size();
 
-	int n = matrixA.size();
-	int m = matrixA[0].size();
-	int p = matrixB[0].size();
 
-	int ** tablica = new int *[n];
-
-	for (int i = 0; i < p; i++)
-		tablica[i] = new int[p];
-
-	std::vector<std::vector<int>> c(n, std::vector<int>(p, 0));
+	//std::vector<std::vector<int>> c(n, std::vector<int>(p, 0));
 
 	for (int j = 0; j < p; j++) {
 		for (int k = 0; k < m; k++) {
 			for (int i = 0; i < n; i++) {
-				c[i][j] += matrixA[i][k] * matrixB[k][j];
+				(*matrixC)[i][j] += (*matrixA)[i][k] * (*matrixB)[k][j];
 			}
 		}
 	}
-
-	return 5;
 }
 
 void multiply() {

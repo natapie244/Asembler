@@ -18,7 +18,7 @@
 
 using namespace System;
 using namespace System::Windows::Forms;
-typedef int(*procCpp)(std::vector<std::vector<int>>, std::vector<std::vector<int>>);
+typedef void(*procCpp)(std::vector<std::vector<double>> *, std::vector<std::vector<double>> *, std::vector<std::vector<double>> *);
 typedef int(*procMASM)(double*, double*, double*, int, int, int);
 //typedef void(*procCpp)();
 
@@ -31,10 +31,10 @@ void Main(array<String^>^ args) {
 	Application::Run(%form);
 }
 
-std::vector<std::vector<int>> loadFile(std::string fileName) {
+std::vector<std::vector<double>> loadFile(std::string fileName) {
 	std::ofstream log;
 
-	std::vector<std::vector<int>> v;
+	std::vector<std::vector<double>> v;
 	const char* f = fileName.c_str();
 
 	FILE* plik;
@@ -44,45 +44,51 @@ std::vector<std::vector<int>> loadFile(std::string fileName) {
 	log.open("log.txt");
 
 	std::string number;
-	std::vector<int> tmp;
+	std::vector<double> tmp;
 
-	std::string kamrol;
 
 	do
 	{
 		znak = fgetc(plik); //zapisujê jeden znak z pliku
 		if (znak == 32) { //32 = space in ASCII
 			if (number != "") {
-				tmp.push_back(stoi(number));
+				tmp.push_back(stod(number));
 				number = "";
 			}
 			
 		}
 		else if(znak == 59) { //59 = ; in ASCII
 			if (number != "") {
-				tmp.push_back(stoi(number));
+				tmp.push_back(stod(number));
 			}
 			number = "";
 
 			v.push_back(tmp);
 			tmp.clear();
 		}
-		else if(isdigit(znak)){
+		else if(isdigit(znak) || znak == 46){ //46 = . in ASCII
 			number += znak;
 		}
 
 	} while (znak != EOF); //End Of File - koniec pliku
 
 	fclose(plik); 
-	for (const auto &e : tmp) log << e << "\n";
-	log << kamrol;
+
+
+	for (const auto &row : v) {
+		for (const auto &e : row) {
+			log << e << " ";
+		}
+
+		log << "; ";
+	}
 	log.close();
 
 	return v;
 }
 
 
-matrixInfo getMatrixInfo(std::vector<std::vector<int>> matrix) {
+matrixInfo getMatrixInfo(std::vector<std::vector<double>> matrix) {
 	matrixInfo info;
 	int columnPattern = -1;
 	info.row = matrix.size();
@@ -134,36 +140,95 @@ void multiplyMatrix(std::vector<std::vector<int>> matrixA, std::vector<std::vect
 	}
 }
 
-void test(std::vector<std::vector<int>> matrixA, std::vector<std::vector<int>> matrixB) {
+
+
+void cppMatrixMultiplication(std::vector<std::vector<double>> matrixA, std::vector<std::vector<double>> matrixB) {
 	HINSTANCE cppDll = LoadLibraryA("DllCpp");
-
 	procCpp multiplyCpp = (procCpp)GetProcAddress(cppDll, "multiplyMatrix");
-	
-	if (cppDll != NULL) {
-		//multiplyCpp();
-		int num = multiplyCpp(matrixA, matrixB);
 
-		std::cout << num;
+	int n = matrixA.size();
+	int p = matrixB[0].size();
+
+	std::vector<std::vector<double>> matrixC(n, std::vector<double>(p, 0));
+
+	if (cppDll != NULL) {
+		multiplyCpp(&matrixA, &matrixB, &matrixC);
 	}
+
+	std::ofstream wynik;
+
+	wynik.open("wynik.txt");
+	for (const auto &row : matrixC) { 
+		for (const auto &e : row) {
+			wynik << e << " "; 
+		}
+
+		wynik << "; ";
+	}
+
+	wynik.close();
+
 
 
 }
 
-void test_2() {
+void asmMatrixMultiplication(std::vector<std::vector<double>> matrixA, std::vector<std::vector<double>> matrixB) {
 	HINSTANCE asmDll = LoadLibraryA("AsmDll");
 	procMASM multiplyMASM = (procMASM)GetProcAddress(asmDll, "Multiply");
 
-	double matrix_1[9] = { 2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0 };
-	double matrix_2[9] = { 3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0 };
-	double matrix_3[9] = { 0.0 };
-	double* mat_1 = matrix_1;
-	double* mat_2 = matrix_2;
-	double* mat_3 = matrix_3;
+	int n = matrixA.size();
+	int m = matrixA[0].size();
+	int p = matrixB[0].size();
+
+	//double matrix_1[9] = { 2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0 };
+	//double matrix_2[9] = { 3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0 };
+
+	//double matrix_3[9] = { 0.0 };  //n * p
+	double * matrixC = new double[n*p];
+
+	for (int i = 0; i < n*p; i++) {
+		matrixC[i] = 0;
+	}
+
+	double* mat_1 = vectorToArray(matrixA);
+	double* mat_2 = vectorToArray(matrixB);
+	double* mat_3 = matrixC;
 
 	if (asmDll != NULL) {
 		//multiplyCpp();
-		multiplyMASM(mat_1, mat_2, mat_3,3,3,3);
-		matrix_3[3] = 0;
+		multiplyMASM(mat_1, mat_2, mat_3,n,m,p);
+
+		//matrixC[0] = 5;
+
+		std::ofstream wynik;
+
+		wynik.open("wynikasm.txt");
+
+		//wynik << *matrixC;
+
+		for (int i = 0; i < n*p; i++) {
+			wynik << matrixC[i] << " ";
+			if(!((i + 1) % p)) {
+				wynik << "; ";
+			}
+		}
+
+		wynik.close();
 	}
+
+
+
+}
+
+double * vectorToArray(std::vector<std::vector<double>> matrixA) {
+	//std::vector<std::vector<int>> v = { {1,2},{3,4},{5,6} };
+	int n = matrixA.size();
+	int m = matrixA[0].size();
+
+	double *arr = (double*)malloc((n * m) * sizeof(double));
+	for (int i = 0; i < n; i++)
+		memcpy(arr + matrixA[i].size() * i, &(matrixA[i][0]), matrixA[i].size() * sizeof(double));
+
+	return arr;
 
 }
